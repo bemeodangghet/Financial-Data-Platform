@@ -1,11 +1,10 @@
-#databases
 from sqlalchemy import create_engine
 from sqlalchemy import Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 
 from core.logger import get_logger
 
-
+#Create engine
 def get_engine():
     """ Create PostgreSQL engine """
     engine = create_engine(
@@ -15,7 +14,8 @@ def get_engine():
     return engine
 
 logger = get_logger(__name__)
-#load data to postgres
+
+#Load data to postgres
 def save_to_postgres(df, table_name, engine):
     metadata = MetaData()
     table = Table(table_name, metadata, autoload_with=engine)

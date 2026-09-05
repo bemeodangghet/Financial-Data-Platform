@@ -21,3 +21,6 @@ tempCodeRunnerFile.py
 
 # Local backup data
 data/
+
+
+.env
