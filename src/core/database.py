@@ -1,35 +1,54 @@
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy import Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 
 from core.logger import get_logger
 
-#Create engine
-def get_engine():
-    """ Create PostgreSQL engine """
-    engine = create_engine(
-        "postgresql+psycopg2://postgres:postgres@localhost:5432/Financial Data Platform"
-    )
 
-    return engine
+load_dotenv()
 
 logger = get_logger(__name__)
 
-#Load data to postgres
-def save_to_postgres(df, table_name, engine):
+
+def get_engine():
+    """Create PostgreSQL engine."""
+
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise ValueError("DATABASE_URL environment variable is not set.")
+
+    return create_engine(database_url)
+
+
+def save_to_postgres(
+    df,
+    table_name: str,
+    engine,
+    constraint_name: str,
+) -> None:
+    """Insert DataFrame records into PostgreSQL and skip duplicates."""
+
     metadata = MetaData()
-    table = Table(table_name, metadata, autoload_with=engine)
+    table = Table(
+        table_name,
+        metadata,
+        autoload_with=engine,
+    )
 
     records = df.to_dict(orient="records")
 
     if not records:
-        logger.warning("No data to insert.")
+        logger.warning(f"No data to insert into '{table_name}'.")
         return
 
     stmt = insert(table).values(records)
 
     stmt = stmt.on_conflict_do_nothing(
-        constraint="unique_daily_rate"
+        constraint=constraint_name
     )
 
     with engine.begin() as connection:
@@ -40,8 +59,12 @@ def save_to_postgres(df, table_name, engine):
     skipped = total - inserted
 
     if inserted == 0:
-        logger.info("No new records inserted. All data already exists.")
+        logger.info(
+            f"No new records inserted into '{table_name}'. "
+            f"All {total} records already exist."
+        )
     else:
         logger.info(
-            f"Inserted {inserted} records, skipped {skipped} duplicates."
+            f"Inserted {inserted} records into '{table_name}', "
+            f"skipped {skipped} duplicates."
         )
