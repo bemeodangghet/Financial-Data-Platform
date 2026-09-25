@@ -22,3 +22,4 @@ def fetch_metals() -> list[dict]:
         metals_responses.append(metals_response)
 
     return metals_responses
+
