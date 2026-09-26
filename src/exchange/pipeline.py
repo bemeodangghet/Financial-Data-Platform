@@ -26,7 +26,7 @@ def run_exchange_pipeline() -> None:
 
     # Save CSV backup
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    file_path = f"data/processed/exchange_rates_{timestamp}.csv"
+    file_path = f"data/processed/exchange_rates/exchange_rates_{timestamp}.csv"
 
     save_csv(exchange_rates_df, file_path)
 

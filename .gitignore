@@ -24,3 +24,5 @@ data/
 
 
 .env
+
+src/test.py

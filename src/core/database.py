@@ -12,7 +12,7 @@ load_dotenv()
 
 logger = get_logger(__name__)
 
-
+# create engine
 def get_engine():
     """Create PostgreSQL engine."""
 
@@ -23,7 +23,7 @@ def get_engine():
 
     return create_engine(database_url)
 
-
+# load data to database
 def save_to_postgres(
     df,
     table_name: str,
