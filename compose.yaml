@@ -1,0 +1,37 @@
+services: #khai báo các thành phần chạy độc lập của application.
+  python_app:
+    build: . #nói với Compose: Build image cho service này từ Dockerfile trong thư mục hiện tại.
+    container_name: financial-app
+
+    env_file:
+      - .env
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18.6
+    container_name: financial-postgres
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    
+    ports:
+    - "5433:5432" #HOST:CONTAINER
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      
+volumes: #add external volumn contain data to postgres
+  postgres_data:
+    external: true #Compose không sở hữu/tạo volume này. Hãy sử dụng volume đã tồn tại.
+    name: financial_pg18_data
