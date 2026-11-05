@@ -1,29 +1,40 @@
+
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, URL
 from sqlalchemy import Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 
 from core.logger import get_logger
 
 
-load_dotenv()
+if os.getenv("RUNNING_IN_DOCKER") != "true":
+    load_dotenv(".env.local", override=True)
 
 logger = get_logger(__name__)
 
-# create engine
+
+# Create engine
 def get_engine():
     """Create PostgreSQL engine."""
 
-    database_url = os.getenv("DATABASE_URL")
+    db_url = URL.create(
+        drivername="postgresql+psycopg2",
+        username=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.environ["DB_HOST"],
+        port=int(os.environ["DB_PORT"]),
+        database=os.environ["DB_NAME"]
+    )
 
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set.")
+    return create_engine(
+        db_url,
+        pool_pre_ping=True
+    )
 
-    return create_engine(database_url)
 
-# load data to database
+# Load data to database
 def save_to_postgres(
     df,
     table_name: str,
@@ -33,6 +44,7 @@ def save_to_postgres(
     """Insert DataFrame records into PostgreSQL and skip duplicates."""
 
     metadata = MetaData()
+
     table = Table(
         table_name,
         metadata,

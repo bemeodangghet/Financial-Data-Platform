@@ -23,6 +23,8 @@ tempCodeRunnerFile.py
 data/
 
 
-.env
+.env.docker
+
+.env.local
 
 src/test.py

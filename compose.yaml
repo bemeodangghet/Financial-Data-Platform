@@ -4,7 +4,10 @@ services: #khai báo các thành phần chạy độc lập của application.
     container_name: financial-app
 
     env_file:
-      - .env
+    - .env
+
+    environment:
+      RUNNING_IN_DOCKER: "true"
     
     depends_on:
       postgres:
